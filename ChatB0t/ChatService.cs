@@ -33,6 +33,10 @@ internal class ChatService
         this.notifyMessageReceived = notifyMessageReceived;
     }
 
+    public void ClearChatHistory()
+    {
+        chatHistory.Clear();
+    }
 
     public async Task<string> GetChatResponse(string message)
     {

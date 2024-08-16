@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,10 +15,26 @@ namespace ChatB0t;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window
+public partial class MainWindow : Window, INotifyPropertyChanged
 {
     ChatService chatService = null!;
-    StringBuilder chatHistory = new StringBuilder();
+    List<ChatHistoryRecord> chatHistoryRecords = new List<ChatHistoryRecord>();
+
+    ChatHistoryRecord currentChatData = null!;
+
+    public List<ChatHistoryRecord> ChatHistoryRecords
+    {
+        get => chatHistoryRecords;
+        set { chatHistoryRecords = value; OnPropertyChanged(nameof(ChatHistoryRecords)); }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+
+    protected void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
     public MainWindow()
     {
@@ -27,27 +44,36 @@ public partial class MainWindow : Window
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
         chatService = new ChatService(NotifyMessageReceived);
+        grdChatHistory.ItemsSource = ChatHistoryRecords;
     }
 
     private async void btnSend_Click(object sender, RoutedEventArgs e)
     {
         try
         {
+            txtUserInput.IsReadOnly = true;
+            txtUserInput.Text = txtUserInput.Text.Trim();
             btnSend.IsEnabled = false;
             btnSend.Content = "Sending...";
 
+            currentChatData = new ChatHistoryRecord() { Message = string.Empty, RecordType = ChatHistoryRecordType.Bot};
+
+            chatHistoryRecords.Add(new ChatHistoryRecord() { Message = txtUserInput.Text, RecordType = ChatHistoryRecordType.User });
+            chatHistoryRecords.Add(currentChatData);
+
+            grdChatHistory.Items.Refresh();
+
             var reponse = await chatService.GetChatResponse(txtUserInput.Text);
 
-            chatHistory.AppendLine(reponse);
             txtUserInput.Text = string.Empty;
-            txtResponse.Text = chatHistory.ToString();
         }
         catch (Exception ex)
         {
-            txtResponse.Text = $"An error occurred while processing your request. Error : {ex.Message}";
+            chatHistoryRecords.Add(new ChatHistoryRecord() { Message = $"An error occurred while processing your request. Error : {ex.Message}", RecordType = ChatHistoryRecordType.Bot });
         }
         finally
         {
+            txtUserInput.IsReadOnly = false;
             btnSend.IsEnabled = true; 
             btnSend.Content = "Send";
         }
@@ -55,13 +81,14 @@ public partial class MainWindow : Window
 
     private void NotifyMessageReceived(string message)
     {
-        txtResponse.Text += message;
+        currentChatData.Message += message;
         scrollView.ScrollToBottom();
     }
 
     private void btnClear_Click(object sender, RoutedEventArgs e)
     {
-        txtResponse.Text = string.Empty;
-        chatHistory.Clear();
+        grdChatHistory.ItemsSource = new List<ChatHistoryRecord>();
+        chatHistoryRecords.Clear();
+        chatService.ClearChatHistory();
     }
 }

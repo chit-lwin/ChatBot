@@ -7,15 +7,80 @@
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
         Title="Sample Chat Bot" Height="490" Width="830">
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition ></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="1"
+        <Button Grid.Row="0" x:Name="btnClear"
+                Content="Clear History"
+                Width="auto"
+                Height="auto"
+                Margin="0,0,0,0"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                Click="btnClear_Click"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top" />
+
+        
+        <ScrollViewer Grid.Row="1"
+                      Margin="0,0,0,0"
+                      x:Name="scrollView"
+                      IsDeferredScrollingEnabled="True"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+                <ListView x:Name="grdChatHistory" BorderBrush="Transparent" BorderThickness="0">
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="local:ChatHistoryRecord">
+                            <WrapPanel>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+
+                                    <Grid SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical" >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                                            <ColumnDefinition></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Column="0"
+                                                x:Name="btnType"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Content="{Binding RecordType}"
+                                                Width="40"
+                                                Height="40">
+                                            <Button.Resources>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="CornerRadius"
+                                                            Value="30" />
+                                                </Style>
+                                            </Button.Resources>
+
+                                        </Button>
+                                        <TextBlock Grid.Column="1"
+                                                   ScrollViewer.CanContentScroll="True"
+                                                   Margin="20,0,0,0"
+                                                   MaxWidth="600"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Message, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                                                   x:Name="txtResponse" />
+
+
+                                    </Grid>
+                                </ScrollViewer>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                
+        </ScrollViewer>
+
+        <Grid Grid.Row="2"
               Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -33,30 +98,5 @@
                     x:Name="btnSend"
                     Click="btnSend_Click" />
         </Grid>
-        <ScrollViewer Grid.Row="0"
-                      Margin="0,10,0,0"
-                      x:Name="scrollView"
-                      IsDeferredScrollingEnabled="True"
-                      HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Auto">
-            <Grid>
-                <TextBlock LineHeight="30"
-                           MaxWidth="800"
-                           TextWrapping="Wrap"
-                           x:Name="txtResponse">
-
-                </TextBlock>
-                <Button x:Name="btnClear"
-                        Content="Clear"
-                        Width="30"
-                        Height="30"
-                        Margin="-20,0,0,0"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        Click="btnClear_Click"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top" />
-            </Grid>
-        </ScrollViewer>
     </Grid>
 </Window>
