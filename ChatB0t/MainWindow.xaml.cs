@@ -87,8 +87,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void btnClear_Click(object sender, RoutedEventArgs e)
     {
-        grdChatHistory.ItemsSource = new List<ChatHistoryRecord>();
+        
         chatHistoryRecords.Clear();
+        grdChatHistory.Items.Refresh();
         chatService.ClearChatHistory();
     }
 }
